@@ -79,12 +79,21 @@ def add_audit(user_id: int, info: dict) -> int:
         return cur.lastrowid
 
 
+BASELINES_KEEP = 5  # per user, directory and algorithm
+
+
 def add_baseline(user_id: int, directory: str, algorithm: str, files: dict) -> int:
     with get_db() as db:
         cur = db.execute(
             "INSERT INTO integrity_baselines (user_id, directory, algorithm, file_count, files, created_at) "
             "VALUES (?,?,?,?,?,?)",
             (user_id, directory, algorithm, len(files), json.dumps(files), utcnow()),
+        )
+        db.execute(
+            "DELETE FROM integrity_baselines WHERE user_id = ? AND directory = ? AND algorithm = ? AND id NOT IN "
+            "(SELECT id FROM integrity_baselines WHERE user_id = ? AND directory = ? AND algorithm = ? "
+            "ORDER BY id DESC LIMIT ?)",
+            (user_id, directory, algorithm, user_id, directory, algorithm, BASELINES_KEEP),
         )
         return cur.lastrowid
 
@@ -115,6 +124,15 @@ def latest_baseline(user_id: int, directory: str, algorithm: str) -> dict | None
     if row:
         row["files"] = json.loads(row["files"])
     return row
+
+def last_baseline_target(user_id: int) -> dict | None:
+    """Directory and algorithm of the user's most recent baseline."""
+    return _one(
+        get_db().execute(
+            "SELECT directory, algorithm FROM integrity_baselines WHERE user_id = ? ORDER BY id DESC LIMIT 1",
+            (user_id,),
+        )
+    )
 
 
 def recent_port_scans(user_id: int, limit: int = 50) -> list[dict]:

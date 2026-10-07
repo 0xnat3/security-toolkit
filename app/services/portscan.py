@@ -111,7 +111,7 @@ def _scan_one(ip: str, host: str, port: int, timeout: float) -> dict | None:
     }
 
 
-def scan_ports(host, start_port=1, end_port=1024, workers=100, timeout=1.0) -> dict:
+def scan_ports(host, start_port=1, end_port=1024, workers=100, timeout=1.0, ip=None) -> dict:
     """Scan start_port..end_port and return only the open ports."""
     try:
         start, end = int(start_port), int(end_port)
@@ -124,7 +124,7 @@ def scan_ports(host, start_port=1, end_port=1024, workers=100, timeout=1.0) -> d
     workers = max(1, min(workers, MAX_WORKERS))
     timeout = max(MIN_TIMEOUT, min(timeout, MAX_TIMEOUT))
 
-    ip = resolve_host(host)
+    ip = ip or resolve_host(host)
     host = host.strip()
     ports = range(start, end + 1)
 

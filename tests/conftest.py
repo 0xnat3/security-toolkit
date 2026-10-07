@@ -12,6 +12,8 @@ class BaseTestConfig(Config):
     SESSION_COOKIE_SECURE = False      # NEW
     REGISTRATION_ENABLED = False       # NEW
     ADMIN_PASSWORD = ""  # never inherit a real password from your .env
+    SCAN_ALLOW_PUBLIC = False   # NEW
+    SCAN_MAX_PORTS = 5000       # NEW
 
 
 @pytest.fixture

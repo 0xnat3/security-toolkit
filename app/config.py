@@ -14,6 +14,8 @@ class ConfigError(RuntimeError):
 
 def _env_bool(name: str, default: bool = False) -> bool:
     return os.getenv(name, str(default)).strip().lower() in {"1", "true", "yes", "on"}
+def _env_paths(name: str) -> tuple[str, ...]:
+    return tuple(p.strip() for p in os.getenv(name, "").split(os.pathsep) if p.strip())
 
 
 class Config:
@@ -49,6 +51,11 @@ class Config:
     ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
     ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")
     REGISTRATION_ENABLED = _env_bool("REGISTRATION_ENABLED", False)
+    
+        # Tool limits
+    SCAN_ALLOW_PUBLIC = _env_bool("SCAN_ALLOW_PUBLIC", False)
+    SCAN_MAX_PORTS = int(os.getenv("SCAN_MAX_PORTS", "5000"))
+    INTEGRITY_ROOTS = _env_paths("INTEGRITY_ROOTS") or (str(Path.home()),)
 
     @classmethod
     def validate(cls) -> None:
