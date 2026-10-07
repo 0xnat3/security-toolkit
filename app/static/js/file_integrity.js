@@ -20,10 +20,12 @@
     ];
   }
 
-  function renderBaseline(d) {
+    function renderBaseline(d) {
     TK.clear(out);
     out.append(
-      TK.notice("success", "Baseline saved: " + TK.plural(d.file_count, "file") + " in " + d.directory + " (" + d.algorithm + ") at " + TK.time(d.created_at) + "."),
+      d.file_count
+        ? TK.notice("success", "Baseline saved: " + TK.plural(d.file_count, "file") + " in " + d.directory + " (" + d.algorithm + ") at " + TK.time(d.created_at) + ".")
+        : TK.notice("warning", "Baseline saved, but " + d.directory + " contains no files, so there is nothing to monitor yet. Add files and create the baseline again."),
       skippedNote(d.skipped_count));
   }
 
