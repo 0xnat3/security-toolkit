@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% from "partials/_form_macros.html" import field %}
+{% block title %}Register · Security Toolkit{% endblock %}
+{% block content %}
+<main class="card narrow">
+  <h1>Create account</h1>
+  <form method="post" novalidate>
+    {{ form.hidden_tag() }}
+    {{ field(form.username, hint="Letters, numbers and underscores, 3-50 characters.", autofocus=true, autocomplete="username") }}
+    {{ field(form.password, hint="At least 12 characters. A passphrase works well.", autocomplete="new-password") }}
+    {{ field(form.confirm_password, autocomplete="new-password") }}
+    <button class="btn btn-primary btn-block" type="submit">Register</button>
+  </form>
+  <p class="foot">Already registered? <a href="{{ url_for('auth.login') }}">Sign in</a></p>
+</main>
+{% endblock %}

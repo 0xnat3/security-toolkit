@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · Security Toolkit{% endblock %}
+{% block content %}
+<main class="card narrow center">
+  <p class="error-code">{{ code }}</p>
+  <h1>{{ title }}</h1>
+  <p class="muted">{{ message }}</p>
+  <a class="btn btn-primary" href="{{ url_for('main.dashboard') }}">Back to the dashboard</a>
+</main>
+{% endblock %}

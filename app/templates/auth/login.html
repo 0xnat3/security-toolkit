@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% from "partials/_form_macros.html" import field %}
+{% block title %}Sign in · Security Toolkit{% endblock %}
+{% block content %}
+<main class="card narrow">
+  <h1>🔒 Security Toolkit</h1>
+  <p class="muted">Sign in to continue</p>
+  <form method="post" novalidate>
+    {{ form.hidden_tag() }}
+    {{ field(form.username, autofocus=true, autocomplete="username") }}
+    {{ field(form.password, autocomplete="current-password") }}
+    <button class="btn btn-primary btn-block" type="submit">Sign in</button>
+  </form>
+  {% if config.REGISTRATION_ENABLED %}
+  <p class="foot">No account yet? <a href="{{ url_for('auth.register') }}">Register</a></p>
+  {% endif %}
+</main>
+{% endblock %}

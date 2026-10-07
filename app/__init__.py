@@ -2,11 +2,14 @@ import logging
 import os
 from logging.handlers import RotatingFileHandler
 
-from flask import Flask
+from flask import Flask, request
 
-from . import db
+from . import db, security
 from .config import Config
+from .errors import register_error_handlers
 from .extensions import csrf, limiter
+
+CSP = "default-src 'self'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 
 
 def _configure_logging(app: Flask) -> None:
@@ -41,18 +44,25 @@ def create_app(config_class=Config) -> Flask:
     csrf.init_app(app)
     limiter.init_app(app)
     db.init_app(app)
+    security.init_app(app)
+
+    from .auth import bp as auth_bp
+    from .main import bp as main_bp
+
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(main_bp)
+    register_error_handlers(app)
 
     @app.after_request
     def set_security_headers(response):
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
         response.headers.setdefault("X-Frame-Options", "DENY")
         response.headers.setdefault("Referrer-Policy", "same-origin")
+        if not app.debug:  # the Werkzeug debugger needs inline scripts
+            response.headers.setdefault("Content-Security-Policy", CSP)
+        if request.endpoint != "static":
+            response.headers.setdefault("Cache-Control", "no-store")  # back button can't reveal pages after logout
         return response
-
-    # TEMPORARY: replaced by the main blueprint in a later step
-    @app.get("/")
-    def index():
-        return "Security Toolkit skeleton is running."
 
     app.logger.info("Security Toolkit started")
     return app

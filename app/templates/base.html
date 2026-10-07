@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <link rel="icon" href="data:,">
+  <title>{% block title %}Security Toolkit{% endblock %}</title>
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+{% if current_user %}
+<header class="topbar">
+  <a class="brand" href="{{ url_for('main.dashboard') }}">🔒 Security Toolkit</a>
+  <nav class="topbar-actions">
+    <button type="button" class="btn btn-ghost" data-theme-toggle title="Toggle light/dark theme">🌓</button>
+    <span class="who">{{ current_user.username }}</span>
+    <a class="btn btn-ghost" href="{{ url_for('auth.change_password') }}">Password</a>
+    <form method="post" action="{{ url_for('auth.logout') }}" class="inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-ghost" type="submit">Sign out</button>
+    </form>
+  </nav>
+</header>
+{% endif %}
+<div class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</div>
+</body>
+</html>

@@ -9,6 +9,8 @@ class BaseTestConfig(Config):
     SECRET_KEY = "test-secret-key-" + "x" * 32
     RATELIMIT_ENABLED = False
     WTF_CSRF_ENABLED = False
+    SESSION_COOKIE_SECURE = False      # NEW
+    REGISTRATION_ENABLED = False       # NEW
     ADMIN_PASSWORD = ""  # never inherit a real password from your .env
 
 
