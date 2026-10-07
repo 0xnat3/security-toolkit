@@ -15,7 +15,11 @@
 {% if current_user %}
 <header class="topbar">
   <a class="brand" href="{{ url_for('main.dashboard') }}">🔒 Security Toolkit</a>
-  <nav class="topbar-actions">
+  <nav class="topnav" aria-label="Main">
+    <a href="{{ url_for('main.dashboard') }}"{% if request.endpoint == 'main.dashboard' %} aria-current="page"{% endif %}>Dashboard</a>
+    <a href="{{ url_for('main.history') }}"{% if request.endpoint == 'main.history' %} aria-current="page"{% endif %}>History</a>
+  </nav>
+  <div class="topbar-actions">
     <button type="button" class="btn btn-ghost" data-theme-toggle title="Toggle light/dark theme">🌓</button>
     <span class="who">{{ current_user.username }}</span>
     <a class="btn btn-ghost" href="{{ url_for('auth.change_password') }}">Password</a>
@@ -23,7 +27,7 @@
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <button class="btn btn-ghost" type="submit">Sign out</button>
     </form>
-  </nav>
+  </div>
 </header>
 {% endif %}
 <div class="container">
@@ -34,5 +38,7 @@
   {% endwith %}
   {% block content %}{% endblock %}
 </div>
+{% if current_user %}<script defer src="{{ url_for('static', filename='js/api.js') }}"></script>{% endif %}
+{% block scripts %}{% endblock %}
 </body>
 </html>

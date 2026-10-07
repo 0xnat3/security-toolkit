@@ -9,14 +9,10 @@
     if (pref === "light" || pref === "dark") return pref;
     return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   }
-  function apply(pref) { root.setAttribute("data-theme", resolve(pref)); }
-
-  apply(stored()); // runs in <head>, before first paint, so there is no flash
-
-  window.setTheme = function (pref) {
-    try { localStorage.setItem(KEY, pref); } catch (e) {}
-    apply(pref);
-  };
+    function apply(pref) {
+    root.setAttribute("data-theme", resolve(pref));
+    document.dispatchEvent(new Event("themechange"));
+  }
 
   if (window.matchMedia) {
     window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () {

@@ -1,8 +1,145 @@
 {% extends "base.html" %}
 {% block title %}Dashboard · Security Toolkit{% endblock %}
 {% block content %}
-<section class="card">
-  <h1>Welcome, {{ current_user.username }}</h1>
-  <p class="muted">Signed in as {{ current_user.role }}. The tools arrive in the next steps.</p>
+<div class="tabs" role="tablist" aria-label="Tools">
+  <button type="button" class="tab" role="tab" data-panel="overview" aria-selected="true">Overview</button>
+  <button type="button" class="tab" role="tab" data-panel="integrity" aria-selected="false">File integrity</button>
+  <button type="button" class="tab" role="tab" data-panel="ports" aria-selected="false">Port scanner</button>
+  <button type="button" class="tab" role="tab" data-panel="audit" aria-selected="false">System audit</button>
+  <button type="button" class="tab" role="tab" data-panel="network" aria-selected="false">Network monitor</button>
+</div>
+
+<section id="panel-overview" class="panel" role="tabpanel">
+  <div id="overview-error"></div>
+  <div class="stats">
+    <div class="stat"><strong data-stat="port_scans">0</strong><span>Port scans</span></div>
+    <div class="stat"><strong data-stat="audits">0</strong><span>System audits</span></div>
+    <div class="stat"><strong data-stat="baselines">0</strong><span>Integrity baselines</span></div>
+    <div class="stat"><strong data-stat="network">0</strong><span>Network samples</span></div>
+  </div>
+
+  <div class="card">
+    <h2>Recent activity</h2>
+    <div id="recent-activity" class="muted">Loading…</div>
+  </div>
+
+  <div class="charts">
+    <div class="card">
+      <h2>Activity breakdown</h2>
+      <div class="chart-box">
+        <canvas id="chart-activity" role="img" aria-label="Doughnut chart of activity by tool"></canvas>
+        <p class="chart-empty muted" hidden></p>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Network (last 10 samples)</h2>
+      <div class="chart-box">
+        <canvas id="chart-network" role="img" aria-label="Line chart of upload and download speed"></canvas>
+        <p class="chart-empty muted" hidden></p>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Open ports per scan</h2>
+      <div class="chart-box">
+        <canvas id="chart-ports" role="img" aria-label="Bar chart of open ports in recent scans"></canvas>
+        <p class="chart-empty muted" hidden></p>
+      </div>
+    </div>
+    <div class="card">
+      <h2>CPU usage at each audit</h2>
+      <div class="chart-box">
+        <canvas id="chart-cpu" role="img" aria-label="Line chart of CPU usage at recent audits"></canvas>
+        <p class="chart-empty muted" hidden></p>
+      </div>
+    </div>
+  </div>
 </section>
+
+<section id="panel-integrity" class="panel card" role="tabpanel" hidden>
+  <h2>File integrity</h2>
+  <p class="lede">Take a snapshot of a folder's file hashes, then check later for modified, added or removed files.</p>
+  <form id="integrity-form" novalidate>
+    <div class="form-grid">
+      <div class="field wide">
+        <label for="fi-directory">Folder</label>
+        <input id="fi-directory" name="directory" autocomplete="off" spellcheck="false"
+               placeholder="Absolute path, or relative to the first allowed folder">
+        <small class="hint">Allowed folders: {{ integrity_roots|join(", ") }}. Leave blank when checking to re-check your most recent baseline.</small>
+      </div>
+      <div class="field">
+        <label for="fi-algorithm">Hash algorithm</label>
+        <select id="fi-algorithm" name="algorithm">
+          <option value="sha256" selected>SHA-256 (recommended)</option>
+          <option value="sha512">SHA-512</option>
+          <option value="sha1">SHA-1 (legacy)</option>
+          <option value="md5">MD5 (legacy)</option>
+        </select>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn btn-primary" data-action="baseline">Create baseline</button>
+      <button type="button" class="btn btn-ghost" data-action="check">Check for changes</button>
+    </div>
+  </form>
+  <div id="integrity-result" class="result" aria-live="polite"></div>
+</section>
+
+<section id="panel-ports" class="panel card" role="tabpanel" hidden>
+  <h2>Port scanner</h2>
+  <p class="lede">
+    {% if config.SCAN_ALLOW_PUBLIC %}Public addresses are enabled. Only scan systems you are authorised to test.
+    {% else %}Only loopback and private-network (LAN) addresses can be scanned.{% endif %}
+    Up to {{ config.SCAN_MAX_PORTS }} ports per scan.
+  </p>
+  <form id="port-form" novalidate>
+    <div class="form-grid">
+      <div class="field wide">
+        <label for="ps-host">Target host or IP</label>
+        <input id="ps-host" name="host" value="127.0.0.1" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="field">
+        <label for="ps-start">Start port</label>
+        <input id="ps-start" name="start_port" type="number" min="1" max="65535" value="1">
+      </div>
+      <div class="field">
+        <label for="ps-end">End port</label>
+        <input id="ps-end" name="end_port" type="number" min="1" max="65535" value="1024">
+      </div>
+      <div class="field">
+        <label for="ps-timeout">Timeout (seconds)</label>
+        <input id="ps-timeout" name="timeout" type="number" min="0.1" max="10" step="0.1" value="1.0">
+        <small class="hint">Lower is faster but may miss slow ports.</small>
+      </div>
+    </div>
+    <div class="actions"><button type="submit" class="btn btn-primary">Scan ports</button></div>
+  </form>
+  <div id="port-result" class="result" aria-live="polite"></div>
+</section>
+
+<section id="panel-audit" class="panel card" role="tabpanel" hidden>
+  <h2>System audit</h2>
+  <p class="lede">Reads the operating system, CPU, memory and uptime of the machine this app runs on.</p>
+  <div class="actions"><button type="button" id="audit-run" class="btn btn-primary">Run audit</button></div>
+  <div id="audit-result" class="result" aria-live="polite"></div>
+</section>
+
+<section id="panel-network" class="panel card" role="tabpanel" hidden>
+  <h2>Network monitor</h2>
+  <p class="lede">Each sample measures this machine's upload and download speed over one second.</p>
+  <div class="actions">
+    <button type="button" id="net-sample" class="btn btn-primary">Sample now</button>
+    <button type="button" id="net-auto" class="btn btn-ghost" aria-pressed="false">Auto-refresh: off</button>
+  </div>
+  <div id="net-result" class="result" aria-live="polite"></div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script defer src="{{ url_for('static', filename='vendor/chart.umd.min.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/file_integrity.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/port_scan.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/audit.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/network.js') }}"></script>
 {% endblock %}

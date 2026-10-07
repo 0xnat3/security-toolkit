@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}History · Security Toolkit{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>History</h1>
+  <button type="button" id="clear-history" class="btn btn-danger">Clear my history</button>
+</div>
+<div id="history-message"></div>
+
+<div class="tabs" role="tablist" aria-label="History">
+  <button type="button" class="tab" role="tab" data-tab="port_scans" aria-selected="true">Port scans</button>
+  <button type="button" class="tab" role="tab" data-tab="audits" aria-selected="false">System audits</button>
+  <button type="button" class="tab" role="tab" data-tab="integrity_baselines" aria-selected="false">Integrity baselines</button>
+  <button type="button" class="tab" role="tab" data-tab="network_logs" aria-selected="false">Network samples</button>
+</div>
+
+<div class="toolbar">
+  <input type="search" id="history-search" class="grow" placeholder="Search…" aria-label="Search history">
+  <select id="history-range" aria-label="Time range">
+    <option value="all">All time</option>
+    <option value="today">Today</option>
+    <option value="week">Last 7 days</option>
+    <option value="month">Last 30 days</option>
+  </select>
+</div>
+
+<div class="card flush">
+  <div class="table-wrap" id="history-table"></div>
+  <p class="footnote">Shows your 50 most recent entries per tool. Times are in your local time zone.</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script defer src="{{ url_for('static', filename='js/history.js') }}"></script>
+{% endblock %}

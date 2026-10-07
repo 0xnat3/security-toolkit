@@ -1,4 +1,5 @@
 :root, html[data-theme="light"] {
+  --chart-1: #3182ce; --chart-2: #38a169; --chart-3: #dd6b20; --chart-4: #805ad5;
   --bg: #f5f7fa;
   --surface: #ffffff;
   --surface-2: #f7fafc;
@@ -18,6 +19,7 @@
 }
 
 html[data-theme="dark"] {
+  --chart-1: #63b3ed; --chart-2: #68d391; --chart-3: #f6ad55; --chart-4: #b794f4;
   --bg: #1a202c;
   --surface: #2d3748;
   --surface-2: #252d3b;
