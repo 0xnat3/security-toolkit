@@ -48,6 +48,7 @@ class Config:
     # First-run admin (no default password on purpose)
     ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
     ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")
+    REGISTRATION_ENABLED = _env_bool("REGISTRATION_ENABLED", False)
 
     @classmethod
     def validate(cls) -> None:
