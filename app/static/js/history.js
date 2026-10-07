@@ -8,6 +8,8 @@
   var search = document.getElementById("history-search");
   var range = document.getElementById("history-range");
   var messageBox = document.getElementById("history-message");
+  var exportCsv = document.getElementById("export-csv");
+  var exportPdf = document.getElementById("export-pdf");
   var tabs = Array.from(document.querySelectorAll("[data-tab]"));
   var DAY = 86400000;
 
@@ -48,6 +50,12 @@
     return 0;
   }
 
+  function updateExportLinks() {
+    // The tab names match the report names the server accepts.
+    exportCsv.href = "/export/" + tab + "/csv";
+    exportPdf.href = "/export/" + tab + "/pdf";
+  }
+
   function render() {
     var cols = TABS[tab];
     var all = data[tab] || [];
@@ -84,6 +92,7 @@
     t.addEventListener("click", function () {
       tab = t.dataset.tab;
       tabs.forEach(function (x) { x.setAttribute("aria-selected", String(x === t)); });
+      updateExportLinks();
       render();
     });
   });
@@ -105,5 +114,6 @@
     }
   });
 
+  updateExportLinks();
   load();
 })();

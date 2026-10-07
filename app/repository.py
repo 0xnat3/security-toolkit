@@ -194,3 +194,33 @@ def clear_history(user_id: int) -> int:
         for table in _HISTORY_TABLES:
             deleted += db.execute(f"DELETE FROM {table} WHERE user_id = ?", (user_id,)).rowcount
     return deleted
+
+# ---------------- exports ----------------
+_EXPORT_QUERIES = {
+    "port_scans": (
+        "SELECT created_at, host, ip, start_port || '-' || end_port AS port_range, open_count, results "
+        "FROM port_scans WHERE user_id = ? ORDER BY id DESC LIMIT ?"
+    ),
+    "audits": (
+        "SELECT created_at, json_extract(results, '$.os') || ' ' || json_extract(results, '$.release') AS system, "
+        "cpu_percent, ram_percent, json_extract(results, '$.ram_gb') AS ram_gb, "
+        "json_extract(results, '$.uptime') AS uptime FROM audits WHERE user_id = ? ORDER BY id DESC LIMIT ?"
+    ),
+    "integrity_baselines": (
+        "SELECT created_at, directory, algorithm, file_count "
+        "FROM integrity_baselines WHERE user_id = ? ORDER BY id DESC LIMIT ?"
+    ),
+    "network_logs": (
+        "SELECT created_at, upload_kb_s, download_kb_s FROM network_logs WHERE user_id = ? ORDER BY id DESC LIMIT ?"
+    ),
+}
+
+
+def export_rows(user_id: int, report_type: str, limit: int) -> list[dict]:
+    """Newest first. The caller must have validated report_type against the REPORTS whitelist."""
+    rows = _all(get_db().execute(_EXPORT_QUERIES[report_type], (user_id, limit)))
+    if report_type == "port_scans":
+        for row in rows:
+            found = json.loads(row.pop("results"))
+            row["open_ports"] = ", ".join(str(p["port"]) for p in sorted(found, key=lambda p: p["port"]))
+    return rows

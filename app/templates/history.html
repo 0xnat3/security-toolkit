@@ -22,11 +22,13 @@
     <option value="week">Last 7 days</option>
     <option value="month">Last 30 days</option>
   </select>
+  <a id="export-csv" class="btn btn-ghost" href="{{ url_for('reports.export', report_type='port_scans', fmt='csv') }}">Export CSV</a>
+  <a id="export-pdf" class="btn btn-ghost" href="{{ url_for('reports.export', report_type='port_scans', fmt='pdf') }}">Export PDF</a>
 </div>
 
 <div class="card flush">
   <div class="table-wrap" id="history-table"></div>
-  <p class="footnote">Shows your 50 most recent entries per tool. Times are in your local time zone.</p>
+  <p class="footnote">Shows your 50 most recent entries per tool, in your local time zone. Exports include all your entries for the selected tool (up to 10,000 in CSV, 500 in PDF), ignoring the search and date filters, with times in UTC.</p>
 </div>
 {% endblock %}
 
