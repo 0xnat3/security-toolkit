@@ -29,7 +29,7 @@ A small Flask web app for running basic security checks on your own machine and 
 Requires Python 3.10 or newer.
 
 ```powershell
-git clone https://github.com/0xnat3/security-toolkit.git
+git clone https://github.com/k1b1w0t/security-toolkit.git
 cd security-toolkit
 python -m venv venv
 .\venv\Scripts\Activate.ps1          # Linux/macOS: source venv/bin/activate
